@@ -5501,6 +5501,14 @@ static char *genRawDecodeRecordField(char *src, const struct_def *sdef,
     src = mputstr(src, ", TRUE");
   }
   src = mputprintf(src, ", &field_%d_force_omit);\n", i);
+
+  // log partially decoded message
+  src = mputprintf(src, "  TTCN_Logger::begin_event(TTCN_DEBUG);\n");
+  src = mputprintf(src, "  TTCN_Logger::log_event_str(\"{ %s := \");\n", sdef->elements[i].name);
+  src = mputprintf(src, "  field_%s%s.log();\n", sdef->elements[i].name, sdef->elements[i].isOptional ? "()" : "");
+  src = mputprintf(src, "  TTCN_Logger::log_event_str(\" }\");\n");
+  src = mputprintf(src, "  TTCN_Logger::end_event();\n");
+
   if (delayed_decode) {
     src = mputprintf(src, "  if (decoded_field_length != %d) return -1;\n",
       sdef->elements[i].raw.length);
